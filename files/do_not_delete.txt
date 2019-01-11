@@ -1,0 +1,4 @@
+Do not delete this file
+It will prevent ansible
+to download and flash the wiki again!
+

@@ -1,0 +1,39 @@
+---
+
+- name: Check if dokuwiki is installed
+  copy:
+    src: files/do_not_delete.txt
+    dest: /var/www/{{ dns_name }}/do_not_delete.txt
+    mode: "u=r,g=r,o=r"
+  register: fresh
+
+- name: Download latest stable dokuwiki tarball
+  unarchive:
+    src: https://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz
+    dest: /var/www/{{ dns_name }}
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+  when: fresh.changed
+
+- name: Fix permissions I
+  file:
+    path: /var/www/{{ dns_name }}
+    recurse: yes
+    owner: nginx
+    group: nginx
+  when: fresh.changed
+
+- name: Fix permissions II
+  file:
+    path: /var/www/{{ dns_name }}/data
+    recurse: yes
+    owner: nginx
+    group: nginx
+    mode: "u=rwx,g=rwx,o=rwx"
+  when: fresh.changed
+
+- name: Restart service nginx, in all cases
+  service:
+    name: nginx
+    state: restarted
+
